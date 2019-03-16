@@ -7,9 +7,10 @@ def CreateDataset(opt):
     from data.aligned_dataset import AlignedDataset
     from data.frame_dataset import FrameDataset
 
-    if opt.video_mode:
+    if opt.task == "next_frame":
         dataset = FrameDataset()
     else:
+        # default "custom" dataset
         dataset = AlignedDataset()
 
     print("dataset [%s] was created" % (dataset.name()))

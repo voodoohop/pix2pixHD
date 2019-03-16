@@ -29,9 +29,11 @@ class BaseOptions():
         self.parser.add_argument('--input_nc', type=int, default=3, help='# of input image channels')
         self.parser.add_argument('--output_nc', type=int, default=3, help='# of output image channels')
 
+        # task choice
+        self.parser.add_argument('--task', type=str, default='default', help='task choice')
+
         # video specifics
-        self.parser.add_argument('--video_mode', action='store_true', default=False, help='toggles video mode / frame dataset')
-        self.parser.add_argument('--scheduled_sampling', action='store_true', default=False, help='activate scheduled sampling inspired training')
+        self.parser.add_argument('--scheduled_sampling', type=str, default='default', help='task to perform')
         self.parser.add_argument('--ss_recursion_prob', type=float, default=0.2, help='probability, at a given step, to use the previous step\'s generated frame as input image')
         self.parser.add_argument('--fps', type=float, default=24., help='frame per second for video generation')
         self.parser.add_argument('--start_from', type=str, default="video", help='seed choice: "video" to use the first frames of the dataset, "noise" to start from a ramdom noise frame, or an image filepath')

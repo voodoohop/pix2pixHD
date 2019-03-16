@@ -35,7 +35,7 @@ if opt.debug:
     pass
 
 # additional enforced options for video
-opt.video_mode = True
+opt.task = "next_frame"
 opt.label_nc = 0
 opt.no_instance = True
 
@@ -60,7 +60,6 @@ if opt.scheduled_sampling:
     latest_generated_frame = None
     recursion = 0
 
-opt.video_mode = True
 data_loader = CreateDataLoader(opt) #this will look for a "frame dataset" at the location you specified
 dataset = data_loader.load_data()
 dataset_size = len(data_loader)

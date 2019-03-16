@@ -19,7 +19,7 @@ opt.serial_batches = True  # no shuffle
 opt.no_flip = True  # no flip
 
 # additional enforced options for video
-opt.video_mode = True
+opt.task = "next_frame"
 opt.label_nc = 0
 opt.no_instance = True
 opt.resize_or_crop = "none"

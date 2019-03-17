@@ -7,11 +7,15 @@ def CreateDataset(opt):
     from data.aligned_dataset import AlignedDataset
     from data.frame_dataset import FrameDataset
     from data.edges_dataset import EdgesDataset
+    from data.left2right_dataset import Left2RightDataset
+
 
     if opt.task == "next_frame":
         dataset = FrameDataset()
     elif opt.task == "edges2x":
         dataset = EdgesDataset()
+    elif opt.task == "left2right":
+        dataset = Left2RightDataset()
     else:
         # default "custom" dataset
         dataset = AlignedDataset()

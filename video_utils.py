@@ -8,6 +8,8 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+import moviepy.editor as mpy
+
 def save_tensor(tensor, path, text="", text_pos="auto", text_color=(255,255,255)):
     """Saving a Torch image tensor into an image (with text)"""
     img_nda = util.tensor2im(tensor.data[0])
@@ -98,3 +100,8 @@ def video_from_frame_directory(frame_dir, video_path, frame_file_glob=r"frame-%0
     print("building video from frames")
     p = subprocess.Popen(shlex.split(command), shell=False)
     p.communicate()
+
+def gif_from_images(img_list, gif_path, fps=1):
+    """Build a GIF from a list of images"""
+    clip = mpy.ImageSequenceClip(img_list, fps=fps)
+    clip.write_gif(gif_path, fps=fps)

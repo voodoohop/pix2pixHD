@@ -24,8 +24,8 @@ class EdgesDataset(BaseDataset):
         self.frame_count = len(self.frame_paths)
         self.dataset_size = self.frame_count
 
-        print("FrameDataset initialized from: %s" % self.dir_frames)
-        print("contains %d frames" % (self.frame_count))
+        print("EdgesDataset initialized from: %s" % self.dir_frames)
+        print("contains %d images" % (self.frame_count))
       
     def __getitem__(self, index):
 

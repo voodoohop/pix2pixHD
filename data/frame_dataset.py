@@ -11,7 +11,7 @@ class FrameDataset(BaseDataset):
         self.root = opt.dataroot
 
         ### frames
-        dir_frames = '_frames'
+        dir_frames = '_images'
         self.dir_frames = os.path.join(opt.dataroot, opt.phase + dir_frames)
         self.frame_paths = sorted(make_dataset(self.dir_frames))
         self.frame_count = len(self.frame_paths)

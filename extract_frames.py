@@ -26,19 +26,19 @@ if (args.width % 32 !=0) or (args.height % 32 !=0):
 print("creating the dataset structure")
 dataset_dir = os.path.realpath(args.pix2pix_dir) + '/datasets/' + args.dataset_name
 os.mkdir(dataset_dir)
-os.mkdir(dataset_dir + "/train_frames")
-os.mkdir(dataset_dir + "/test_frames")
+os.mkdir(dataset_dir + "/train_images")
+os.mkdir(dataset_dir + "/test_images")
 
 video_utils.extract_frames_from_video(
 	os.path.realpath(args.input_video),
-	dataset_dir + "/train_frames",
+	dataset_dir + "/train_images",
 	output_shape=(args.width, args.height)
 )
 
 # copy first few frames to, for example, start the generated videos
-for frame in sorted(glob(dataset_dir + "/train_frames/*.jpg"))[:60]:
+for frame in sorted(glob(dataset_dir + "/train_images/*.jpg"))[:60]:
     shutil.copy(
         frame,
-        dataset_dir + "/test_frames"
+        dataset_dir + "/test_images"
     )
 

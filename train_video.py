@@ -71,6 +71,54 @@ display_delta = total_steps % opt.display_freq
 print_delta = total_steps % opt.print_freq
 save_delta = total_steps % opt.save_latest_freq
 
+import sys
+from PIL import Image
+from PIL import ImageFilter
+from data.base_dataset import BaseDataset, get_params, get_transform, normalize
+
+class Dataset(object):
+    def __init__(self, mode="train"):
+        from glob import glob
+        self.dir_images = os.path.join(opt.dataroot, mode + "_images")
+
+        if not os.path.isdir(self.dir_images):
+            raise Exception('directory <%s> does not exist' % self.dir_images)
+
+        self.img_paths = sorted(glob(self.dir_images+"/*.jpg"))
+        self.img_count = len(self.img_paths)
+        self.dataset_size = self.img_count - 1
+
+        print("Dataset initialized from: %s" % self.dir_images)
+        print("contains %d images" % (self.img_count))
+
+    def get_sample(self, index):
+        left_frame_path = self.img_paths[index]
+        right_frame_path = self.img_paths[index+1]
+
+        left_frame = Image.open(left_frame_path)
+        right_frame = Image.open(right_frame_path)
+
+        left_tensor = video_utils.im2tensor(left_frame)
+        right_tensor = video_utils.im2tensor(right_frame)
+
+        input_dict = {
+            'left_frame': left_tensor,
+            'left_path': left_frame_path,
+            'right_frame': right_tensor,
+            'right_path': right_frame_path,
+        }
+
+        return input_dict
+
+
+EARLY_STOPPING = True
+if EARLY_STOPPING:
+    dev_loss_filepath = os.path.join(opt.checkpoints_dir, opt.name, 'dev_loss.txt')
+    dev_set = Dataset(mode="val")
+    round_without_improvement = 0
+    dev_losses = []
+    patience = 10
+    best_g_loss = ("none", 1e6)
 
 for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
     epoch_start_time = time.time()
@@ -160,3 +208,50 @@ for epoch in range(start_epoch, opt.niter + opt.niter_decay + 1):
     ### linearly decay learning rate after certain iterations
     if epoch > opt.niter:
         model.module.update_learning_rate()
+
+    if EARLY_STOPPING:
+        # eval loss on dev set (after everything is saved)
+        with torch.no_grad():
+            epoch_sample_losses = []
+            for i in range(dev_set.dataset_size):
+                data = dev_set.get_sample(i)
+
+                left_frame = Variable(data['left_frame'])      
+                right_frame = Variable(data['right_frame'])
+
+                losses, latest_generated_frame = model(
+                    left_frame, None,
+                    right_frame, None,
+                    infer=False
+                )
+
+                # sum per device losses
+                losses = [ torch.mean(x) if not isinstance(x, int) else x for x in losses ]
+                loss_dict = dict(zip(model.module.loss_names, losses))
+
+                # calculate final loss scalar
+                loss_D = (loss_dict['D_fake'] + loss_dict['D_real']) * 0.5
+                loss_G = loss_dict['G_GAN'] + loss_dict.get('G_GAN_Feat',0) + loss_dict.get('G_VGG',0)
+
+                epoch_sample_losses.append(loss_G.item())
+
+        epoch_g_loss = np.mean(epoch_sample_losses)
+        print("epoch", epoch, "G loss on dev set:", epoch_g_loss)
+        with open(dev_loss_filepath, "a+") as f:
+            f.write("epoch %s - dev loss %.4f\n" %(str(epoch), float(epoch_g_loss)))
+
+        dev_losses.append(epoch_g_loss)
+        if float(epoch_g_loss) < best_g_loss[1]:
+            print("new best")
+            with open(dev_loss_filepath, "a+") as f:
+                f.write("new best\n")
+            best_g_loss = (epoch, float(epoch_g_loss))
+            round_without_improvement = 0
+        else:
+            round_without_improvement += 1
+
+        if round_without_improvement >= patience:
+            print("early stopping, best G loss:", best_g_loss)
+            with open(dev_loss_filepath, "a+") as f:
+                f.write("early stopping, best G loss: %.4f at epoch %s\n" % (float(best_g_loss[1]), str(best_g_loss[0])))
+            sys.exit(0)

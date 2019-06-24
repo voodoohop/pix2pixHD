@@ -23,7 +23,7 @@ def save_tensor(tensor, path, text="", text_pos="auto", text_color=(255,255,255)
 
         draw = ImageDraw.Draw(img_pil)
         # font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 50)
-        draw.text((text_xpos, text_ypos), text, text_color, font=font)
+        draw.text((text_xpos, text_ypos), text, text_color)
 
     img_pil.save(path)
 
@@ -38,7 +38,7 @@ def save_img(img_pil, path, text="", text_pos="auto", text_color=(255,255,255)):
 
         draw = ImageDraw.Draw(img_pil)
         # font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf", 50)
-        draw.text((text_xpos, text_ypos), text, text_color, font=font)
+        draw.text((text_xpos, text_ypos), text, text_color)
 
     img_pil.save(path)
 
